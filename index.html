@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Role Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    label { font-weight: bold; }
+    #status { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Role Manager</h1>
+
+  <label for="guildId">Server ID (Guild ID):</label>
+  <input type="text" id="guildId" placeholder="Enter your server ID">
+
+  <label for="userId">User ID:</label>
+  <input type="text" id="userId" placeholder="Enter the Discord user ID">
+
+  <label for="roles">Roles (comma-separated):</label>
+  <input type="text" id="roles" placeholder="e.g., Premium Member, VIP">
+
+  <button onclick="updateRoles()">Update Roles</button>
+
+  <p id="status"></p>
+
+  <script>
+    const backendUrl = "https://your-worker-or-backend-url.com/update_roles"; // Change this to your backend
+
+    async function updateRoles() {
+      const guildId = document.getElementById('guildId').value.trim();
+      const userId = document.getElementById('userId').value.trim();
+      const roles = document.getElementById('roles').value.split(',').map(r => r.trim()).filter(r => r);
+
+      if (!guildId || !userId || roles.length === 0) {
+        document.getElementById('status').innerText = "Please fill all fields.";
+        return;
+      }
+
+      try {
+        const res = await fetch(backendUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guild_id: guildId, user_id: userId, roles })
+        });
+
+        const data = await res.json();
+        if (data.status === "success") {
+          document.getElementById('status').innerText = "Roles updated: " + data.roles.join(", ");
+        } else {
+          document.getElementById('status').innerText = "Error updating roles.";
+        }
+      } catch (err) {
+        document.getElementById('status').innerText = "Network or backend error.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
